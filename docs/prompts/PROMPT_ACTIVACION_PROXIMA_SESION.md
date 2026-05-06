@@ -33,7 +33,9 @@ El MVP V1 está implementado, corregido y desplegado. Usa:
 - `index.html` — monolito HTML/CSS/JS sin framework ni build step
 - `data/` — JSON editable (rutas, actividades, badges, avatares, config)
 - `docs/` — documentación Markdown completa
-- `tests/index.html` — suite de 40 tests unitarios ejecutable en el navegador
+- `tests/index.html` — runner de tests unitarios ejecutable en el navegador
+- `tests/unit/` — runner, fixture y specs unitarias (49 assertions)
+- `.codex/skills/wellbe-quest/SKILL.md` — skill local del proyecto
 - `CLAUDE.md` — guía de contexto para Claude Code
 - `AGENTS.md` — guía de restricciones para agentes
 - Progreso local con `localStorage` bajo la clave `wellbeQuestV1Progress`
@@ -42,8 +44,10 @@ El MVP V1 está implementado, corregido y desplegado. Usa:
 Funcionalidades completadas en sesiones anteriores:
 
 - Modal de actividad: `dialog[open] { display: flex }` + `getBoundingClientRect()` para backdrop
+- Modal de actividad ampliado: historia, Wellbe y preguntas organizadas como tarjetas
 - Panel lateral 📚 Guías: 4 tabs por nivel, descarga MD, cierre con ×/backdrop/Escape
 - Bug crítico resuelto: backticks sin escapar en `GUIDE_MARKDOWN.n3` — fix en `39575a9`
+- Unit tests reorganizados y ampliados — commit `28c222a`
 
 ---
 
@@ -56,7 +60,7 @@ Funcionalidades completadas en sesiones anteriores:
    - `docs/session/COMPENDIO_SESION.md`
    - `docs/followup/PRIMER_SEGUIMIENTO.md`
 3. Arranca el servidor local: `python3 -m http.server 8000`
-4. Verifica los tests en `http://localhost:8000/tests/index.html` — deben mostrar 40/40 verde
+4. Verifica los tests en `http://localhost:8000/tests/index.html` — deben mostrar 49/49 verde
 5. No agregues backend ni servicios externos
 6. No cambies el esquema JSON sin actualizar `docs/DATA_SCHEMA.md`
 7. No introduzcas datos personales reales
@@ -86,6 +90,6 @@ Cada sesión debe terminar con:
 
 - cambios validados (tests pasan, prueba manual ejecutada si aplica)
 - documentación actualizada si se modificó lógica o esquema
-- commit claro con co-autoría de Claude
+- commit claro
 - push a `main`
 - documentos de cierre actualizados (`COMPENDIO_SESION.md`, `PRIMER_SEGUIMIENTO.md`, este archivo)

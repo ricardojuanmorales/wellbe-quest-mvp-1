@@ -1,12 +1,12 @@
 # Primer de Seguimiento
 
-Fecha: 2026-05-05
+Fecha: 2026-05-06
 
 ## Estado Actual
 
-WellBe Quest v1 — Mapa del Buen Vivir está implementado como MVP estático funcional. El modal de actividad está corregido. Existe un panel lateral de guías por nivel con descarga. La suite de tests corre en el navegador. El repo está sincronizado con GitHub Pages.
+WellBe Quest v1 — Mapa del Buen Vivir está implementado como MVP estático funcional. El modal de actividad está corregido y ampliado con tarjetas para la historia, el mensaje de Wellbe y las preguntas. Existe un panel lateral de guías por nivel con descarga. La suite de tests corre en el navegador desde `tests/index.html` y está organizada en `tests/unit/`. El repo está sincronizado con GitHub Pages.
 
-Commit más reciente: `39575a9 — Fix backticks sin escapar en GUIDE_MARKDOWN n3 que rompían el app`
+Commit más reciente: `28c222a — Mejorar modal de actividades y agregar unit tests`
 
 ---
 
@@ -42,9 +42,9 @@ Los tests son un runner HTML sin frameworks. Arrancar el servidor local y abrir:
 http://localhost:8000/tests/index.html
 ```
 
-Se muestran los resultados de 40 assertions sobre las funciones puras del core. Verde = todo pasa. Si hay fallos, aparecen en rojo con el valor esperado vs obtenido.
+Se muestran los resultados de 49 assertions sobre las funciones puras del core. Verde = todo pasa. Si hay fallos, aparecen en rojo con el valor esperado vs obtenido.
 
-Cuando se modifica lógica pura en `index.html`, mantener en sync las funciones replicadas en `tests/index.html`.
+Cuando se modifica lógica pura en `index.html`, mantener en sync las funciones replicadas en `tests/unit/wellbe-logic.fixture.js` y actualizar specs en `tests/unit/*.spec.js`.
 
 ---
 
@@ -63,7 +63,7 @@ Cuando se modifica lógica pura en `index.html`, mantener en sync las funciones 
 
 3. **Mensajes contextuales de WellBe** por ruta o actividad (actualmente genéricos por nivel).
 4. **README.md raíz** — actualizarlo para reflejar el estado real del MVP.
-5. **Ampliar los tests** — añadir casos para `renderQuiz`, `normalizeProgress` completo, y `evaluateBadges` con triggers de las 12 actividades.
+5. **Ampliar los tests** — añadir casos para renderers interactivos (`renderQuiz`, semáforo, simulación) y flujo DOM del modal.
 
 ### Fuera de alcance (no agregar)
 
@@ -102,6 +102,8 @@ Ejecutar desde GitHub Pages (`https://ricardojuanmorales.github.io/wellbe-quest-
 ### Modal de actividad
 
 - [ ] Modal se abre, muestra contenido completo, se cierra con botón ×
+- [ ] Historia y mensaje de Wellbe se muestran como tarjetas legibles
+- [ ] Preguntas del quiz se muestran como tarjetas con espacio suficiente
 - [ ] Clic en backdrop (zona oscura fuera del recuadro) lo cierra
 - [ ] Tecla Escape lo cierra
 

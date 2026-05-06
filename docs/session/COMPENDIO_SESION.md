@@ -1,6 +1,6 @@
 # Compendio de Sesión
 
-Fecha de cierre: 2026-05-05
+Fecha de cierre: 2026-05-06
 
 ## Proyecto
 
@@ -28,6 +28,22 @@ Implementación del MVP V1: app estática con `index.html`, 4 rutas, 12 activida
 
 ## Esta Sesión — Lo Realizado
 
+### 0. Actualización de cierre 2026-05-06
+
+Se realizó una pasada final de mejora sobre el MVP:
+
+- Modal de actividades ampliado y reorganizado para que la historia, el mensaje de Wellbe y las preguntas respiren en tarjetas.
+- Nuevo cartapacio `tests/unit/` con runner, fixture y specs separadas.
+- Suite ampliada a **49 assertions — todas pasan**.
+- `CLAUDE.md`, `docs/TESTING_VALIDATION.md` y skill local `.codex/skills/wellbe-quest/SKILL.md` actualizados.
+- Sincronización final con GitHub en `main`.
+
+Commit publicado:
+
+```text
+28c222a  Mejorar modal de actividades y agregar unit tests
+```
+
 ### 1. Sincronización del repositorio local
 
 El repo local apuntaba al remoto incorrecto (`wellbe-asistente-nutricion-ia-1`). Se corrigió el `remote url` y se ejecutó `git reset --hard origin/main` para sincronizar con el estado correcto de `wellbe-quest-mvp-1`.
@@ -41,22 +57,20 @@ Se identificaron dos bugs en el modal que impedían su uso correcto:
 | Modal demasiado pequeño | `dialog { display: flex }` aplastado por el UA stylesheet del navegador | `dialog[open] { display: flex; flex-direction: column; }` |
 | Botón cerrar / backdrop no funcionan | `e.target === e.currentTarget` no captura clics en `::backdrop` de `showModal()` | `getBoundingClientRect()` para detectar clics fuera del recuadro |
 
-### 3. Suite de tests unitarios (`tests/index.html`)
+### 3. Suite de tests unitarios (`tests/index.html` + `tests/unit/`)
 
-Nuevo runner HTML ejecutable desde el servidor estático en `http://localhost:8000/tests/index.html`.
+Runner HTML ejecutable desde el servidor estático en `http://localhost:8000/tests/index.html`.
 
-Cubre 6 funciones puras del core:
+La suite ahora está organizada en archivos pequeños:
 
-| Función | Tests |
+| Archivo | Rol |
 |---|---|
-| `escapeHtml` | 8 |
-| `uniqueKnownIds` | 6 |
-| `calculateLevel` | 7 |
-| `calculateRouteProgress` | 6 |
-| `evaluateBadges` | 7 |
-| `createDefaultProgress` | 6 |
+| `tests/unit/test-runner.js` | runner mínimo sin dependencias |
+| `tests/unit/wellbe-logic.fixture.js` | fixtures y réplica de lógica pura |
+| `tests/unit/progress.spec.js` | progreso, niveles, rutas, badges, `normalizeProgress` |
+| `tests/unit/security.spec.js` | `escapeHtml` |
 
-**Total: 40 assertions — todas pasan.**
+**Total: 49 assertions — todas pasan.**
 
 ### 4. `CLAUDE.md`
 
@@ -95,11 +109,14 @@ El error impedía que `attachEvents()` completara, dejando toda la app sin inter
 ## Archivos Modificados / Creados
 
 ```text
-CLAUDE.md                               ← creado
-index.html                              ← modal fixes, panel guías, fix backtick
-tests/index.html                        ← creado (40 tests)
-docs/session/COMPENDIO_SESION.md        ← este archivo
-docs/followup/PRIMER_SEGUIMIENTO.md     ← actualizado
+CLAUDE.md                                ← actualizado
+index.html                               ← modal ampliado + tarjetas de información
+tests/index.html                         ← runner HTML
+tests/unit/                              ← cartapacio de unit tests
+.codex/skills/wellbe-quest/SKILL.md      ← skill local del proyecto
+docs/TESTING_VALIDATION.md               ← actualizado
+docs/session/COMPENDIO_SESION.md         ← este archivo
+docs/followup/PRIMER_SEGUIMIENTO.md      ← actualizado
 docs/prompts/PROMPT_ACTIVACION_PROXIMA_SESION.md ← actualizado
 ```
 
@@ -108,6 +125,7 @@ docs/prompts/PROMPT_ACTIVACION_PROXIMA_SESION.md ← actualizado
 ## Commits de Esta Sesión
 
 ```text
+28c222a  Mejorar modal de actividades y agregar unit tests
 39575a9  Fix backticks sin escapar en GUIDE_MARKDOWN n3 que rompían el app
 74b9947  Mejorar mensaje de error en init(): detectar file:// vs servidor
 4ab518a  Añadir panel lateral de guías de usuario por nivel con descarga
@@ -121,12 +139,13 @@ d75ec91  Fix modal display y backdrop, añadir suite de tests y CLAUDE.md
 
 | Componente | Estado |
 |---|---|
-| Modal de actividad | Corregido — layout y cierre funcionan |
-| Tests unitarios | 40 assertions — todas pasan |
-| CLAUDE.md | Creado |
+| Modal de actividad | Corregido y ampliado — información en tarjetas |
+| Tests unitarios | 49 assertions — todas pasan |
+| CLAUDE.md | Actualizado |
+| Skill local | `.codex/skills/wellbe-quest/SKILL.md` creado |
 | Panel 📚 Guías | Implementado — 4 tabs, descarga MD |
 | Bug backtick n3 | Corregido y desplegado |
-| Push a GitHub | Completado (`39575a9`) |
+| Push a GitHub | Completado (`28c222a`) |
 | GitHub Pages | App funcional tras el fix |
 
 **Pendiente para próxima sesión:** prueba manual completa del checklist en GitHub Pages; mejoras de accesibilidad (`aria-pressed`, live regions, confirmaciones de reinicio/importar).
