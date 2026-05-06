@@ -30,8 +30,11 @@ data/
   game_config.json  # Levels, points thresholds, WellBe messages, privacy commitments
 tests/
   index.html        # Browser-based unit test runner (open via static server)
+  unit/             # Unit runner, fixtures, and specs
 docs/               # Architecture, data schema, privacy, roadmap
 exports/            # Gitignored; for manual user exports only
+.codex/skills/
+  wellbe-quest/     # Local Codex skill for this static MVP
 ```
 
 All game logic, rendering, and state live in `index.html`. There is no transpilation, bundler, or framework.
@@ -45,21 +48,20 @@ All game logic, rendering, and state live in `index.html`. There is no transpila
 
 ## Testing
 
-Tests live in `tests/index.html`. They are browser-based (no test framework, no Node runner). Open via the static server:
+Unit tests live in `tests/unit/` and are loaded by `tests/index.html`. They are browser-based (no test framework, no Node runner). Open via the static server:
 
 ```
 http://localhost:8000/tests/index.html
 ```
 
-The test file replicates the pure logic functions from `index.html` (since the app has no module system) and runs assertions against mock data. Tests cover: `escapeHtml`, `uniqueKnownIds`, `calculateLevel`, `calculateRouteProgress`, `evaluateBadges`, `createDefaultProgress`.
+The unit cartapacio uses plain scripts:
 
-When editing core logic in `index.html`, keep the replicated functions in `tests/index.html` in sync.
+- `tests/unit/test-runner.js` — tiny assertion/render runner.
+- `tests/unit/wellbe-logic.fixture.js` — mock data plus replicas of pure logic from `index.html`.
+- `tests/unit/progress.spec.js` — progress, levels, routes, badges, and `normalizeProgress`.
+- `tests/unit/security.spec.js` — escaping/render-safety helpers.
 
-To verify test logic without a browser, run the inline Node check:
-
-```bash
-node -e "/* paste pure functions + assertions */"
-```
+When editing core logic in `index.html`, keep the replicated functions in `tests/unit/wellbe-logic.fixture.js` in sync and add or update specs in `tests/unit/*.spec.js`.
 
 ## Activity modal
 

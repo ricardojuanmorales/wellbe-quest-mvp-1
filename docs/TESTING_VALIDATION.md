@@ -3,6 +3,8 @@
 ## Checks tecnicos
 
 - Validar JSON con `jq empty data/*.json`.
+- Correr pruebas unitarias en `http://localhost:8000/tests/index.html`.
+- Mantener specs en `tests/unit/` cuando cambie logica pura.
 - Confirmar que rutas apuntan a actividades existentes.
 - Confirmar que badges referenciados existen.
 - Confirmar que `default_avatar_id` existe.
