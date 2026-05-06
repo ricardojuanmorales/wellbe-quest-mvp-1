@@ -621,6 +621,177 @@
       .panel, .card { padding: 14px; }
       .stat-grid { grid-template-columns: 1fr; }
     }
+
+    /* ── Guides panel ── */
+    .nav-guides-btn {
+      white-space: nowrap;
+      padding: 5px 13px;
+      border-radius: var(--radius);
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--forest);
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      cursor: pointer;
+      transition: background .15s, border-color .15s;
+      margin-left: 8px;
+    }
+    .nav-guides-btn:hover { background: #d5efdf; border-color: var(--forest); }
+    .guides-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(23,33,29,.45);
+      z-index: 199;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s;
+    }
+    .guides-backdrop.open { opacity: 1; pointer-events: auto; }
+    .guides-panel {
+      position: fixed;
+      top: 0; right: 0; bottom: 0;
+      width: min(500px, 100vw);
+      background: var(--surface);
+      border-left: 1px solid var(--line);
+      box-shadow: -8px 0 40px rgba(23,33,29,.14);
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform .3s cubic-bezier(.4,0,.2,1);
+    }
+    .guides-panel.open { transform: translateX(0); }
+    .guides-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid var(--line);
+      flex-shrink: 0;
+    }
+    .guides-header h2 { margin: 0; font-size: 1rem; }
+    .guides-close {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      cursor: pointer;
+      font-size: .9rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .15s;
+    }
+    .guides-close:hover { background: var(--line); }
+    .guides-tabs {
+      display: flex;
+      gap: 2px;
+      padding: 10px 14px 0;
+      border-bottom: 1px solid var(--line);
+      overflow-x: auto;
+      scrollbar-width: none;
+      flex-shrink: 0;
+    }
+    .guides-tabs::-webkit-scrollbar { display: none; }
+    .guides-tab {
+      white-space: nowrap;
+      padding: 6px 12px;
+      border-radius: var(--radius) var(--radius) 0 0;
+      font-size: .8rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      border-bottom: none;
+      background: transparent;
+      color: var(--muted);
+      transition: background .15s, color .15s;
+    }
+    .guides-tab:hover { background: var(--surface-2); color: var(--ink); }
+    .guides-tab[aria-selected="true"] {
+      background: var(--surface);
+      color: var(--forest);
+      border-color: var(--line);
+      border-bottom-color: var(--surface);
+      margin-bottom: -1px;
+    }
+    .guides-content {
+      flex: 1 1 0;
+      overflow-y: auto;
+      padding: 20px;
+    }
+    .guide-section { display: none; }
+    .guide-section.active { display: block; }
+    .guide-section h3 {
+      font-size: .92rem;
+      color: var(--forest);
+      margin: 0 0 8px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid var(--line);
+    }
+    .guide-section h4 {
+      font-size: .85rem;
+      margin: 14px 0 4px;
+      color: var(--ink);
+    }
+    .guide-section p, .guide-section li {
+      font-size: .85rem;
+      color: var(--ink);
+      line-height: 1.55;
+    }
+    .guide-section ol, .guide-section ul {
+      margin: 0 0 10px;
+      padding-left: 18px;
+    }
+    .guide-section li { margin-bottom: 3px; }
+    .guide-note {
+      font-size: .8rem;
+      color: var(--muted);
+      background: var(--surface-2);
+      border-left: 3px solid var(--forest);
+      padding: 8px 12px;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      margin: 8px 0;
+    }
+    .guide-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .8rem;
+      margin: 8px 0 12px;
+    }
+    .guide-table th {
+      text-align: left;
+      padding: 5px 8px;
+      background: var(--surface-2);
+      font-weight: 600;
+      font-size: .75rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    .guide-table td {
+      padding: 5px 8px;
+      border-top: 1px solid var(--line);
+      vertical-align: top;
+    }
+    .guide-activity-type {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      margin-bottom: 10px;
+    }
+    .guide-activity-type strong { font-size: .85rem; color: var(--ink); }
+    .guide-activity-type p { margin: 0; font-size: .82rem; color: var(--muted); }
+    .guides-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
   </style>
 </head>
 <body>
@@ -647,8 +818,221 @@
         <a href="#badges">Badges</a>
         <a href="#avatar">Avatar</a>
         <a href="#privacidad">Privacidad</a>
+        <button class="nav-guides-btn" type="button" id="guides-btn"
+                aria-controls="guides-panel" aria-expanded="false"
+                aria-label="Abrir guías de usuario">📚 Guías</button>
       </div>
     </nav>
+
+    <!-- Guides panel -->
+    <div class="guides-backdrop" id="guides-backdrop" aria-hidden="true"></div>
+    <aside id="guides-panel" class="guides-panel" aria-label="Guías de usuario" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="guides-header">
+        <h2>📚 Guías de usuario</h2>
+        <button class="guides-close" id="guides-close" type="button" aria-label="Cerrar guías">✕</button>
+      </div>
+      <div class="guides-tabs" role="tablist" aria-label="Guías por nivel">
+        <button class="guides-tab" role="tab" aria-selected="true"  aria-controls="guide-n1" id="tab-n1" data-guide="n1">🌱 Nivel 1</button>
+        <button class="guides-tab" role="tab" aria-selected="false" aria-controls="guide-n2" id="tab-n2" data-guide="n2">🔗 Nivel 2</button>
+        <button class="guides-tab" role="tab" aria-selected="false" aria-controls="guide-n3" id="tab-n3" data-guide="n3">🔍 Nivel 3</button>
+        <button class="guides-tab" role="tab" aria-selected="false" aria-controls="guide-n4" id="tab-n4" data-guide="n4">🌍 Nivel 4</button>
+      </div>
+
+      <div class="guides-content">
+
+        <!-- Nivel 1 — Explorador inicial -->
+        <div class="guide-section active" id="guide-n1" role="tabpanel" aria-labelledby="tab-n1">
+          <h3>🌱 Explorador inicial — Cómo empezar</h3>
+          <p>En este nivel das tus primeros pasos en el Mapa del Buen Vivir. Completa al menos <strong>1 actividad</strong> para avanzar al Nivel 2.</p>
+
+          <h4>1. Crear tu perfil</h4>
+          <ol>
+            <li>Ve a la sección <strong>Perfil</strong> (primera sección de la página)</li>
+            <li>Escribe tu nombre o alias (opcional — puedes usar "Explorador/a")</li>
+            <li>Selecciona tu rol si quieres</li>
+            <li>Haz clic en <strong>Crear perfil</strong></li>
+          </ol>
+          <div class="guide-note">El perfil se guarda en tu navegador. Nadie más lo ve.</div>
+
+          <h4>2. Elegir tu avatar</h4>
+          <ol>
+            <li>Ve a la sección <strong>Avatar</strong></li>
+            <li>Hay 4 avatares transdisciplinarios — cada uno representa una forma de conocer</li>
+            <li>Haz clic sobre la tarjeta del avatar que eliges</li>
+          </ol>
+
+          <h4>3. Tu primera actividad</h4>
+          <ol>
+            <li>Ve a la sección <strong>Actividades</strong></li>
+            <li>Elige cualquier actividad y haz clic en <strong>Comenzar actividad</strong></li>
+            <li>Sigue las instrucciones dentro del modal</li>
+            <li>Al terminar, haz clic en <strong>Completar actividad</strong></li>
+            <li>Se suman los puntos y se desbloquea el badge <em>Primer paso</em> 🏅</li>
+          </ol>
+          <div class="guide-note">El modal se cierra con el botón ✕ Cerrar, con la tecla Escape, o haciendo clic en la zona oscura fuera del recuadro.</div>
+
+          <h4>Hoja de ruta del Nivel 1</h4>
+          <table class="guide-table">
+            <tr><th>Acción</th><th>Resultado</th></tr>
+            <tr><td>Completar 1 actividad</td><td>Badge Primer paso 🏅</td></tr>
+            <tr><td>Acumular 50 pts</td><td>Sube a Nivel 2 — Conector</td></tr>
+          </table>
+        </div>
+
+        <!-- Nivel 2 — Conector de saberes -->
+        <div class="guide-section" id="guide-n2" role="tabpanel" aria-labelledby="tab-n2">
+          <h3>🔗 Conector de saberes — Las actividades</h3>
+          <p>En este nivel exploras los 6 tipos de actividad. Completa <strong>3 actividades de la misma ruta</strong> para desbloquear el badge de ruta completa.</p>
+
+          <div class="guide-activity-type">
+            <strong>🧪 Quiz — Preguntas conceptuales</strong>
+            <p>Lee cada pregunta → elige una opción → se muestra la respuesta correcta con su explicación. Responde todas las preguntas para completar.</p>
+          </div>
+
+          <div class="guide-activity-type">
+            <strong>🚦 Semáforo de Claims — Detectar afirmaciones</strong>
+            <p>Lee la afirmación → decide si es <em>Verdadera</em>, <em>Engañosa</em> o <em>Falsa</em> → se revela el veredicto con explicación. Evalúa todas para completar.</p>
+          </div>
+
+          <div class="guide-activity-type">
+            <strong>🌿 Decisiones ramificadas</strong>
+            <p>Lee el escenario → elige una opción → cada elección lleva a una rama diferente → Wellbe ofrece un cierre reflexivo al final. No hay respuestas incorrectas.</p>
+          </div>
+
+          <div class="guide-activity-type">
+            <strong>🧠 Mapa mental</strong>
+            <p>Observa el nodo central → haz clic en cada nodo de colores para expandirlo → lee descripción y ejemplos. Abre al menos <strong>3 nodos</strong> para completar.</p>
+          </div>
+
+          <div class="guide-activity-type">
+            <strong>🌱 Simulación</strong>
+            <p>Observa el medidor de resiliencia → lee cada situación → elige una decisión → el medidor sube o baja según tu elección. Sin "Game Over" — el objetivo es reflexionar.</p>
+          </div>
+
+          <div class="guide-activity-type">
+            <strong>✍️ Reflexión — Preguntas abiertas</strong>
+            <p>Lee el mensaje de Wellbe → escribe tus respuestas en los cuadros de texto (mínimo 10 caracteres en uno) → haz clic en Completar. Tus reflexiones no se guardan, son para ti.</p>
+          </div>
+
+          <h4>Las 4 rutas</h4>
+          <table class="guide-table">
+            <tr><th>Ruta</th><th>Territorio</th></tr>
+            <tr><td>🥦 Ruta 1</td><td>Nutrición Humana</td></tr>
+            <tr><td>🛒 Ruta 2</td><td>Seguridad Alimentaria</td></tr>
+            <tr><td>🌿 Ruta 3</td><td>Agroecología y Comunidad</td></tr>
+            <tr><td>🤖 Ruta 4</td><td>IA, Salud Pública y Buen Vivir</td></tr>
+          </table>
+
+          <h4>Hoja de ruta del Nivel 2</h4>
+          <table class="guide-table">
+            <tr><th>Acción</th><th>Resultado</th></tr>
+            <tr><td>Completar 3 actividades de una ruta</td><td>Badge Ruta completa 🏅</td></tr>
+            <tr><td>Acumular 120 pts</td><td>Sube a Nivel 3 — Analista</td></tr>
+          </table>
+        </div>
+
+        <!-- Nivel 3 — Analista del buen vivir -->
+        <div class="guide-section" id="guide-n3" role="tabpanel" aria-labelledby="tab-n3">
+          <h3>🔍 Analista del buen vivir — Progreso y badges</h3>
+          <p>En este nivel tienes un ojo crítico sobre los datos. Completa <strong>6 actividades</strong> para el badge de mitad del mapa y apunta a las <strong>12</strong> para el mapa completo.</p>
+
+          <h4>Niveles y puntos</h4>
+          <table class="guide-table">
+            <tr><th>Nivel</th><th>Nombre</th><th>Puntos</th></tr>
+            <tr><td>1</td><td>🌱 Explorador inicial</td><td>0 pts</td></tr>
+            <tr><td>2</td><td>🔗 Conector de saberes</td><td>50 pts</td></tr>
+            <tr><td>3</td><td>🔍 Analista del buen vivir</td><td>120 pts</td></tr>
+            <tr><td>4</td><td>🌍 Co-creador comunitario</td><td>220 pts</td></tr>
+          </table>
+
+          <h4>Todos los badges</h4>
+          <table class="guide-table">
+            <tr><th>Badge</th><th>Condición</th></tr>
+            <tr><td>🏅 Primer paso</td><td>Completa 1 actividad</td></tr>
+            <tr><td>🏅 Ruta completa</td><td>Termina las 3 actividades de 1 ruta</td></tr>
+            <tr><td>🏅 Mitad del mapa</td><td>Completa 6 actividades</td></tr>
+            <tr><td>🏅 Mapa completo</td><td>Completa las 12 actividades</td></tr>
+            <tr><td>🏅 Exploración comunitaria</td><td>Completa una actividad de Agroecología</td></tr>
+            <tr><td>🏅 IA responsable</td><td>Completa una actividad de IA y Salud</td></tr>
+            <tr><td>🏅 Explorador de tipos</td><td>Completa actividades de 4 tipos distintos</td></tr>
+          </table>
+
+          <h4>Guardar y trasladar tu progreso</h4>
+          <ol>
+            <li>Ve a la sección <strong>Progreso</strong></li>
+            <li>Haz clic en <strong>Exportar progreso</strong> → se descarga un archivo <code>.json</code></li>
+            <li>Guárdalo en un lugar seguro (nube, USB, carpeta local)</li>
+          </ol>
+          <div class="guide-note">El archivo contiene: actividades completadas, puntos, nivel, badges y avatar.</div>
+
+          <h4>Importar en otro dispositivo</h4>
+          <ol>
+            <li>Abre la app en el nuevo dispositivo</li>
+            <li>Ve a <strong>Progreso</strong> → <strong>Importar JSON</strong></li>
+            <li>Selecciona el archivo exportado → la app valida y carga tu progreso</li>
+          </ol>
+          <div class="guide-note">Importar reemplaza el progreso actual. Exporta primero si quieres conservarlo.</div>
+
+          <h4>Reiniciar</h4>
+          <ol>
+            <li>Haz clic en <strong>Reiniciar progreso</strong></li>
+            <li>Confirma en el diálogo</li>
+            <li>El progreso vuelve a cero — el perfil y el avatar no se borran</li>
+          </ol>
+        </div>
+
+        <!-- Nivel 4 — Co-creador comunitario -->
+        <div class="guide-section" id="guide-n4" role="tabpanel" aria-labelledby="tab-n4">
+          <h3>🌍 Co-creador comunitario — Privacidad y personalización</h3>
+          <p>En este nivel conoces los límites y las posibilidades de la plataforma, y puedes personalizar el contenido para tu comunidad.</p>
+
+          <h4>Lo que la app guarda (solo en tu navegador)</h4>
+          <ul>
+            <li>Actividades completadas</li>
+            <li>Avatar seleccionado</li>
+            <li>Puntos, nivel y badges</li>
+            <li>Nombre/alias y rol del perfil (opcional)</li>
+          </ul>
+
+          <h4>Lo que la app NO guarda ni envía</h4>
+          <ul>
+            <li>Tus reflexiones escritas</li>
+            <li>Información de identificación personal</li>
+            <li>Datos médicos o nutricionales</li>
+            <li>Datos de ubicación</li>
+          </ul>
+          <div class="guide-note">No hay servidores externos. No hay cookies de rastreo. No hay cuentas de usuario.</div>
+
+          <h4>Para docentes e investigadores — Editar contenido</h4>
+          <ol>
+            <li>Los archivos <code>data/*.json</code> son editables con cualquier editor de texto</li>
+            <li>Consulta <code>docs/DATA_SCHEMA.md</code> para ver la estructura de cada archivo</li>
+            <li>Usa IDs estables en kebab-case (ej: <code>act-mi-nueva-actividad</code>)</li>
+            <li>Verifica que los IDs de actividad estén enlazados a una ruta existente</li>
+          </ol>
+
+          <h4>Aviso clínico</h4>
+          <p>Wellbe Quest es una herramienta educativa. <strong>No reemplaza</strong> la atención de profesionales de salud, nutrición, psicología ni trabajo social.</p>
+
+          <h4>Preguntas frecuentes</h4>
+          <table class="guide-table">
+            <tr><th>Pregunta</th><th>Respuesta</th></tr>
+            <tr><td>¿Funciona sin internet?</td><td>Sí, con servidor local activo</td></tr>
+            <tr><td>¿Mis reflexiones se guardan?</td><td>No en V1 — son solo para ti</td></tr>
+            <tr><td>¿Puedo reiniciar una actividad?</td><td>Sí, con el botón Reiniciar de cada tarjeta</td></tr>
+            <tr><td>¿El consentimiento envía datos?</td><td>No en V1 — es un campo para uso futuro</td></tr>
+            <tr><td>¿Por qué no carga si abro directo?</td><td>Abre desde el servidor local (localhost:8000)</td></tr>
+          </table>
+        </div>
+
+      </div><!-- /guides-content -->
+
+      <div class="guides-footer">
+        <button class="btn good" type="button" id="guides-download-full">⬇ Guía completa (.md)</button>
+        <button class="btn secondary" type="button" id="guides-download-tab">⬇ Esta guía (.md)</button>
+      </div>
+    </aside>
+    <!-- /Guides panel -->
 
     <main id="app">
 
@@ -1069,6 +1453,76 @@
       saveProgress();
       render();
       document.querySelector("#import-status").textContent = "Progreso reiniciado en este navegador.";
+    }
+
+    /* ─────────────────────────────────────────
+       Guides panel
+    ───────────────────────────────────────── */
+    let activeGuideTab = "n1";
+
+    function openGuides() {
+      document.querySelector("#guides-panel").classList.add("open");
+      document.querySelector("#guides-backdrop").classList.add("open");
+      document.querySelector("#guides-panel").removeAttribute("aria-hidden");
+      document.querySelector("#guides-backdrop").removeAttribute("aria-hidden");
+      document.querySelector("#guides-btn").setAttribute("aria-expanded", "true");
+      document.querySelector("#guides-close").focus();
+    }
+
+    function closeGuides() {
+      document.querySelector("#guides-panel").classList.remove("open");
+      document.querySelector("#guides-backdrop").classList.remove("open");
+      document.querySelector("#guides-panel").setAttribute("aria-hidden", "true");
+      document.querySelector("#guides-backdrop").setAttribute("aria-hidden", "true");
+      document.querySelector("#guides-btn").setAttribute("aria-expanded", "false");
+      document.querySelector("#guides-btn").focus();
+    }
+
+    function switchGuideTab(tabKey) {
+      activeGuideTab = tabKey;
+      document.querySelectorAll(".guides-tab").forEach(btn => {
+        const selected = btn.dataset.guide === tabKey;
+        btn.setAttribute("aria-selected", String(selected));
+      });
+      document.querySelectorAll(".guide-section").forEach(sec => {
+        sec.classList.toggle("active", sec.id === `guide-${tabKey}`);
+      });
+    }
+
+    const GUIDE_MARKDOWN = {
+      n1: `# Guía Nivel 1 — Explorador inicial\n\nWellbe Quest v1 · Mapa del Buen Vivir\n\n## Cómo empezar\n\n### 1. Crear tu perfil\n\n1. Ve a la sección **Perfil** (primera sección de la página)\n2. Escribe tu nombre o alias (opcional)\n3. Selecciona tu rol si quieres\n4. Haz clic en **Crear perfil**\n\n> El perfil se guarda en tu navegador. Nadie más lo ve.\n\n### 2. Elegir tu avatar\n\n1. Ve a la sección **Avatar**\n2. Hay 4 avatares transdisciplinarios\n3. Haz clic sobre la tarjeta del avatar que eliges\n\n### 3. Tu primera actividad\n\n1. Ve a **Actividades**\n2. Haz clic en **Comenzar actividad**\n3. Sigue las instrucciones dentro del modal\n4. Haz clic en **Completar actividad**\n5. Se desbloquea el badge *Primer paso*\n\n> El modal se cierra con ✕ Cerrar, con Escape, o haciendo clic fuera del recuadro.\n\n## Hoja de ruta del Nivel 1\n\n| Acción | Resultado |\n|---|---|\n| Completar 1 actividad | Badge Primer paso |\n| Acumular 50 pts | Sube a Nivel 2 — Conector |\n`,
+      n2: `# Guía Nivel 2 — Conector de saberes\n\nWellbe Quest v1 · Mapa del Buen Vivir\n\n## Los 6 tipos de actividad\n\n### Quiz — Preguntas conceptuales\nLee cada pregunta → elige una opción → se muestra la respuesta con explicación. Responde todas para completar.\n\n### Semáforo de Claims\nLee la afirmación → decide si es Verdadera, Engañosa o Falsa → se revela el veredicto. Evalúa todas para completar.\n\n### Decisiones ramificadas\nLee el escenario → elige una opción → cada elección lleva a una rama diferente → Wellbe ofrece un cierre reflexivo. No hay respuestas incorrectas.\n\n### Mapa mental\nHaz clic en cada nodo para expandirlo. Abre al menos **3 nodos** para completar.\n\n### Simulación\nEl medidor de resiliencia sube o baja según tus decisiones. Sin "Game Over" — el objetivo es reflexionar.\n\n### Reflexión — Preguntas abiertas\nEscribe tus respuestas (mínimo 10 caracteres en un campo). Tus reflexiones no se guardan, son para ti.\n\n## Las 4 rutas\n\n| Ruta | Territorio |\n|---|---|\n| Ruta 1 | Nutrición Humana |\n| Ruta 2 | Seguridad Alimentaria |\n| Ruta 3 | Agroecología y Comunidad |\n| Ruta 4 | IA, Salud Pública y Buen Vivir |\n\n## Hoja de ruta del Nivel 2\n\n| Acción | Resultado |\n|---|---|\n| Completar 3 actividades de una ruta | Badge Ruta completa |\n| Acumular 120 pts | Sube a Nivel 3 — Analista |\n`,
+      n3: `# Guía Nivel 3 — Analista del buen vivir\n\nWellbe Quest v1 · Mapa del Buen Vivir\n\n## Niveles y puntos\n\n| Nivel | Nombre | Puntos |\n|---|---|---|\n| 1 | Explorador inicial | 0 pts |\n| 2 | Conector de saberes | 50 pts |\n| 3 | Analista del buen vivir | 120 pts |\n| 4 | Co-creador comunitario | 220 pts |\n\n## Todos los badges\n\n| Badge | Condición |\n|---|---|\n| Primer paso | Completa 1 actividad |\n| Ruta completa | Termina las 3 actividades de 1 ruta |\n| Mitad del mapa | Completa 6 actividades |\n| Mapa completo | Completa las 12 actividades |\n| Exploración comunitaria | Actividad de Agroecología |\n| IA responsable | Actividad de IA y Salud |\n| Explorador de tipos | Completa 4 tipos distintos de actividad |\n\n## Exportar progreso\n\n1. Ve a la sección **Progreso**\n2. Haz clic en **Exportar progreso**\n3. Se descarga un archivo `.json` con la fecha de hoy\n\nEl archivo contiene: actividades completadas, puntos, nivel, badges y avatar.\n\n## Importar en otro dispositivo\n\n1. Abre la app en el nuevo dispositivo\n2. Ve a **Progreso** → **Importar JSON**\n3. Selecciona el archivo exportado\n\n> Importar reemplaza el progreso actual. Exporta primero si quieres conservarlo.\n\n## Reiniciar\n\n1. Haz clic en **Reiniciar progreso**\n2. Confirma en el diálogo\n3. El progreso vuelve a cero (el perfil y el avatar no se borran)\n`,
+      n4: `# Guía Nivel 4 — Co-creador comunitario\n\nWellbe Quest v1 · Mapa del Buen Vivir\n\n## Lo que la app guarda (solo en tu navegador)\n\n- Actividades completadas\n- Avatar seleccionado\n- Puntos, nivel y badges\n- Nombre/alias y rol del perfil (opcional)\n\n## Lo que la app NO guarda ni envía\n\n- Tus reflexiones escritas\n- Información de identificación personal\n- Datos médicos o nutricionales\n- Datos de ubicación\n\nNo hay servidores externos. No hay cookies de rastreo. No hay cuentas de usuario.\n\n## Para docentes e investigadores — Editar contenido\n\n1. Los archivos \`data/*.json\` son editables con cualquier editor de texto\n2. Consulta \`docs/DATA_SCHEMA.md\` para la estructura de cada archivo\n3. Usa IDs estables en kebab-case\n4. Verifica que los IDs de actividad estén enlazados a una ruta existente\n\n## Aviso clínico\n\nWellbe Quest es una herramienta educativa. **No reemplaza** la atención de profesionales de salud, nutrición, psicología ni trabajo social.\n\n## Preguntas frecuentes\n\n| Pregunta | Respuesta |\n|---|---|\n| ¿Funciona sin internet? | Sí, con servidor local activo |\n| ¿Mis reflexiones se guardan? | No en V1 — son solo para ti |\n| ¿Puedo reiniciar una actividad? | Sí, con el botón Reiniciar de cada tarjeta |\n| ¿El consentimiento envía datos? | No en V1 — campo para uso futuro |\n| ¿Por qué no carga si abro directo? | Usa localhost:8000 desde el servidor local |\n`
+    };
+
+    async function downloadGuideTab() {
+      const md = GUIDE_MARKDOWN[activeGuideTab] || "";
+      const tabLabels = { n1: "nivel-1-explorador", n2: "nivel-2-conector", n3: "nivel-3-analista", n4: "nivel-4-cocreador" };
+      triggerDownload(md, `wellbe-quest-guia-${tabLabels[activeGuideTab]}.md`, "text/markdown;charset=utf-8");
+    }
+
+    async function downloadGuideFull() {
+      try {
+        const r = await fetch("docs/GUIA_USUARIO.md");
+        if (!r.ok) throw new Error();
+        const text = await r.text();
+        triggerDownload(text, "wellbe-quest-guia-usuario.md", "text/markdown;charset=utf-8");
+      } catch {
+        const full = Object.values(GUIDE_MARKDOWN).join("\n\n---\n\n");
+        triggerDownload(full, "wellbe-quest-guia-usuario.md", "text/markdown;charset=utf-8");
+      }
+    }
+
+    function triggerDownload(content, filename, type) {
+      const blob = new Blob([content], { type });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(link.href);
     }
 
     /* ─────────────────────────────────────────
@@ -1534,6 +1988,19 @@
       document.querySelector("#export-progress").addEventListener("click", exportProgress);
       document.querySelector("#import-progress").addEventListener("change", e => importProgress(e.target.files[0]));
       document.querySelector("#reset-progress").addEventListener("click", resetProgress);
+
+      /* Guides panel */
+      document.querySelector("#guides-btn").addEventListener("click", openGuides);
+      document.querySelector("#guides-close").addEventListener("click", closeGuides);
+      document.querySelector("#guides-backdrop").addEventListener("click", closeGuides);
+      document.querySelector("#guides-download-full").addEventListener("click", downloadGuideFull);
+      document.querySelector("#guides-download-tab").addEventListener("click", downloadGuideTab);
+      document.querySelector("#guides-panel").addEventListener("keydown", e => {
+        if (e.key === "Escape") closeGuides();
+      });
+      document.querySelectorAll(".guides-tab").forEach(btn => {
+        btn.addEventListener("click", () => switchGuideTab(btn.dataset.guide));
+      });
     }
 
     /* ─────────────────────────────────────────
