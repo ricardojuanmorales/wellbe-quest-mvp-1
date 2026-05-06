@@ -1,93 +1,120 @@
 # Primer de Seguimiento
 
+Fecha: 2026-05-05
+
 ## Estado Actual
 
-Wellbe Quest v1 - Mapa del Buen Vivir esta implementado como MVP estatico en la raiz del repositorio. El repo esta conectado y sincronizado con GitHub.
+WellBe Quest v1 — Mapa del Buen Vivir está implementado como MVP estático funcional. El modal de actividad fue corregido (bugs de display y cierre). Existe una suite de tests unitarios. El repo está sincronizado con GitHub.
 
-## Como Ejecutar
+Commit más reciente: `d75ec91 — Fix modal display y backdrop, añadir suite de tests y CLAUDE.md`
 
-Desde la raiz del proyecto:
+---
+
+## Cómo Ejecutar la App
+
+Desde la raíz del proyecto:
 
 ```bash
 python3 -m http.server 8000
 ```
 
-Luego abrir:
+Abrir en el navegador:
 
 ```text
 http://localhost:8000
 ```
 
-No abrir `index.html` directamente si se quiere probar la carga de JSON, porque el navegador puede bloquear `fetch` de archivos locales.
+No abrir `index.html` directamente con doble clic — el navegador bloquea `fetch` de archivos locales.
 
-## Proxima Prioridad Recomendada
+App en GitHub Pages:
 
-Hacer prueba manual completa de aceptacion:
+```text
+https://ricardojuanmorales.github.io/wellbe-quest-mvp-1/
+```
 
-1. Abrir la app en navegador desde servidor local.
-2. Confirmar que cargan las 4 rutas, 12 actividades, 6 badges y 4 avatars.
-3. Seleccionar un avatar.
-4. Completar una actividad.
-5. Confirmar puntos, nivel, badge de primer paso y estadisticas.
-6. Completar las 3 actividades de una ruta.
-7. Confirmar progreso de ruta al 100% y badge de ruta completa.
-8. Completar 6 actividades y confirmar badge de mitad del mapa.
-9. Completar las 12 actividades y confirmar badge de mapa completo.
-10. Recargar la pagina y verificar persistencia local.
-11. Exportar progreso JSON.
-12. Reiniciar progreso.
-13. Importar el JSON exportado.
-14. Confirmar restauracion de progreso.
-15. Probar navegacion con teclado.
-16. Probar vista movil.
+---
 
-## Correcciones Recomendadas de la Auditoria
+## Cómo Ejecutar los Tests
 
-- Agregar `aria-pressed` a botones de avatar seleccionado y actividades completadas.
-- Anunciar cambios de puntos/badges en una region viva.
-- Agregar confirmacion antes de reiniciar progreso.
-- Agregar confirmacion antes de sobrescribir progreso importado.
-- Mejorar Wellbe con mensajes locales contextuales por ruta o actividad.
-- Actualizar el `README.md` raiz para que describa el MVP actual.
+Los tests son un runner HTML sin frameworks. Arrancar el servidor local y abrir:
 
-## Mantener Fuera de Alcance por Ahora
+```text
+http://localhost:8000/tests/index.html
+```
 
-- Backend.
-- Supabase.
-- OAuth.
-- API externa.
-- IA externa.
-- Telemetria remota.
-- Analitica.
-- Perfiles remotos.
-- Datos personales.
-- Recomendaciones clinicas o dietas personalizadas.
+Se muestran los resultados de 40 assertions sobre las funciones puras del core. Verde = todo pasa. Si hay fallos, aparecen en rojo con el valor esperado vs obtenido.
 
-## Comandos Utiles
+Cuando se modifica lógica pura en `index.html`, mantener en sync las funciones replicadas en `tests/index.html`.
 
-Validar JSON:
+---
+
+## Prioridades para la Próxima Sesión
+
+### Alta prioridad
+
+1. **Prueba manual de aceptación en navegador** — completar el checklist de validación abajo.
+2. **Accesibilidad básica:**
+   - `aria-pressed` en tarjetas de avatar seleccionado y actividades completadas
+   - Región viva (`aria-live="polite"`) para anunciar cambios de puntos y badges
+   - Confirmación antes de reiniciar progreso (actualmente destruye sin preguntar)
+   - Confirmación antes de sobrescribir progreso importado
+
+### Media prioridad
+
+3. **Mensajes contextuales de WellBe** por ruta o actividad (actualmente genéricos por nivel).
+4. **README.md raíz** — actualizarlo para reflejar el estado real del MVP.
+5. **Ampliar los tests** — añadir casos para `renderQuiz`, `normalizeProgress` completo, y `evaluateBadges` con triggers de 12 actividades.
+
+### Fuera de alcance (no agregar)
+
+- Backend, Supabase, OAuth, APIs externas, telemetría, analytics, perfiles remotos
+- Recomendaciones clínicas o dietas personalizadas
+- Datos personales reales
+
+---
+
+## Checklist de Prueba Manual de Aceptación
+
+Ejecutar desde el servidor local o desde GitHub Pages:
+
+- [ ] Carga de la app sin errores en consola
+- [ ] Se muestran 4 rutas, 12 actividades, 6 badges, 4 avatares
+- [ ] Selección de avatar se persiste
+- [ ] Completar una actividad → puntos y badge "Primer paso"
+- [ ] Completar 3 actividades de una ruta → progreso de ruta al 100% y badge de ruta
+- [ ] Completar 6 actividades → badge "Mitad del mapa"
+- [ ] Completar actividad de comunidad → badge correspondiente
+- [ ] Completar actividad de IA → badge correspondiente
+- [ ] Completar 4 tipos distintos de actividad → badge de explorador de tipos
+- [ ] Recargar la página → progreso persiste
+- [ ] Exportar progreso → descarga JSON con nombre correcto
+- [ ] Reiniciar progreso → queda en cero
+- [ ] Importar el JSON exportado → restaura correctamente
+- [ ] Modal de actividad: se abre, muestra contenido completo, se cierra con botón
+- [ ] Modal: clic en backdrop (zona oscura fuera del recuadro) lo cierra
+- [ ] Modal: tecla Escape lo cierra
+- [ ] Navegación por teclado → todos los botones son accesibles
+- [ ] Vista móvil → no hay desbordamientos horizontales
+
+---
+
+## Comandos Útiles
 
 ```bash
+# Servidor local
+python3 -m http.server 8000
+
+# Validar JSON
 jq empty data/*.json
-```
 
-Buscar servicios externos activos:
+# Verificar que no hay servicios externos activos
+grep -r "https\?://\|supabase\|oauth\|analytics\|telemetry\|cdn" index.html data/
 
-```bash
-rg "https?://|supabase|oauth|analytics|telemetry|cdn|api" index.html data
-```
-
-Ver estado Git:
-
-```bash
+# Estado Git
 git status --short --branch
+
+# Subir cambios
+git add <archivos>
+git commit -m "Mensaje claro"
+git push origin main
 ```
-
-Subir cambios:
-
-```bash
-git add .
-git commit -m "Describe change"
-git push
-```
-
