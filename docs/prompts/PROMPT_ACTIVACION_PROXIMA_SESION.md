@@ -28,21 +28,22 @@ https://ricardojuanmorales.github.io/wellbe-quest-mvp-1/
 
 ## Estado al Inicio de Esta Sesión
 
-El MVP V1 está implementado y corregido. Usa:
+El MVP V1 está implementado, corregido y desplegado. Usa:
 
 - `index.html` — monolito HTML/CSS/JS sin framework ni build step
 - `data/` — JSON editable (rutas, actividades, badges, avatares, config)
 - `docs/` — documentación Markdown completa
-- `tests/index.html` — suite de tests unitarios ejecutable en el navegador
+- `tests/index.html` — suite de 40 tests unitarios ejecutable en el navegador
 - `CLAUDE.md` — guía de contexto para Claude Code
 - `AGENTS.md` — guía de restricciones para agentes
 - Progreso local con `localStorage` bajo la clave `wellbeQuestV1Progress`
 - Sin backend, Supabase, OAuth, APIs externas, telemetría ni dependencias instaladas
 
-Bugs resueltos en la sesión anterior:
+Funcionalidades completadas en sesiones anteriores:
 
-- Modal de actividad: `dialog[open] { display: flex }` (fix de layout)
-- Cierre por backdrop: `getBoundingClientRect()` (fix de evento)
+- Modal de actividad: `dialog[open] { display: flex }` + `getBoundingClientRect()` para backdrop
+- Panel lateral 📚 Guías: 4 tabs por nivel, descarga MD, cierre con ×/backdrop/Escape
+- Bug crítico resuelto: backticks sin escapar en `GUIDE_MARKDOWN.n3` — fix en `39575a9`
 
 ---
 
@@ -55,7 +56,7 @@ Bugs resueltos en la sesión anterior:
    - `docs/session/COMPENDIO_SESION.md`
    - `docs/followup/PRIMER_SEGUIMIENTO.md`
 3. Arranca el servidor local: `python3 -m http.server 8000`
-4. Verifica los tests en `http://localhost:8000/tests/index.html` — deben mostrar todo verde
+4. Verifica los tests en `http://localhost:8000/tests/index.html` — deben mostrar 40/40 verde
 5. No agregues backend ni servicios externos
 6. No cambies el esquema JSON sin actualizar `docs/DATA_SCHEMA.md`
 7. No introduzcas datos personales reales
@@ -64,7 +65,7 @@ Bugs resueltos en la sesión anterior:
 
 ## Primera Tarea Recomendada
 
-Ejecutar la prueba manual de aceptación completa del modal corregido y validar las 12 actividades en el navegador. El checklist está en `docs/followup/PRIMER_SEGUIMIENTO.md`.
+Ejecutar la prueba manual de aceptación completa desde GitHub Pages (con Ctrl+Shift+R para limpiar caché). El checklist está en `docs/followup/PRIMER_SEGUIMIENTO.md`. Incluye validación del panel 📚 Guías.
 
 ---
 

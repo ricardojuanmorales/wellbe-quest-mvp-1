@@ -26,58 +26,26 @@ Implementación del MVP V1: app estática con `index.html`, 4 rutas, 12 activida
 
 ---
 
-## Sesión Actual — Lo Realizado
+## Esta Sesión — Lo Realizado
 
-### 1. Diagnóstico del modal de actividad
+### 1. Sincronización del repositorio local
 
-Se identificaron dos bugs reportados desde GitHub Pages:
+El repo local apuntaba al remoto incorrecto (`wellbe-asistente-nutricion-ia-1`). Se corrigió el `remote url` y se ejecutó `git reset --hard origin/main` para sincronizar con el estado correcto de `wellbe-quest-mvp-1`.
 
-| Bug | Causa raíz |
-|---|---|
-| Modal demasiado pequeño | `dialog { display: flex }` — el UA stylesheet de los navegadores fuerza `display: block` al abrir el dialog, aplastando el layout flex |
-| Botón "Cerrar" y backdrop no funcionan | `e.target === e.currentTarget` no captura clics en el pseudo-elemento `::backdrop` de `showModal()` |
+### 2. Correcciones en el modal de actividad
 
-### 2. Correcciones en `index.html`
+Se identificaron dos bugs en el modal que impedían su uso correcto:
 
-**Fix CSS (línea ~344):**
+| Bug | Causa raíz | Fix |
+|---|---|---|
+| Modal demasiado pequeño | `dialog { display: flex }` aplastado por el UA stylesheet del navegador | `dialog[open] { display: flex; flex-direction: column; }` |
+| Botón cerrar / backdrop no funcionan | `e.target === e.currentTarget` no captura clics en `::backdrop` de `showModal()` | `getBoundingClientRect()` para detectar clics fuera del recuadro |
 
-```css
-/* Antes: */
-dialog {
-  display: flex;
-  flex-direction: column;
-}
+### 3. Suite de tests unitarios (`tests/index.html`)
 
-/* Después: */
-dialog { /* sin display */ }
-dialog[open] {
-  display: flex;
-  flex-direction: column;
-}
-```
+Nuevo runner HTML ejecutable desde el servidor estático en `http://localhost:8000/tests/index.html`.
 
-**Fix backdrop click (línea ~1503):**
-
-```javascript
-/* Antes: */
-document.querySelector("#activity-modal").addEventListener("click", e => {
-  if (e.target === e.currentTarget) closeModal();
-});
-
-/* Después: */
-document.querySelector("#activity-modal").addEventListener("click", e => {
-  const rect = e.currentTarget.getBoundingClientRect();
-  const inside = e.clientX >= rect.left && e.clientX <= rect.right
-              && e.clientY >= rect.top  && e.clientY <= rect.bottom;
-  if (!inside) closeModal();
-});
-```
-
-### 3. Suite de tests (`tests/index.html`)
-
-Nueva carpeta `tests/` con runner HTML ejecutable desde el servidor estático en `http://localhost:8000/tests/index.html`.
-
-Cubre las 6 funciones puras del core:
+Cubre 6 funciones puras del core:
 
 | Función | Tests |
 |---|---|
@@ -88,66 +56,64 @@ Cubre las 6 funciones puras del core:
 | `evaluateBadges` | 7 |
 | `createDefaultProgress` | 6 |
 
-**Total: 40 assertions. 40/40 pasaron.**
+**Total: 40 assertions — todas pasan.**
 
 ### 4. `CLAUDE.md`
 
-Nuevo archivo en la raíz del repo con orientación para Claude Code:
+Archivo de contexto para Claude Code creado en la raíz:
 
-- Arquitectura y estructura del proyecto
-- Instrucciones para correr la app localmente
-- Instrucciones para correr los tests
+- Arquitectura del proyecto, comandos para correr la app y los tests
 - Notas técnicas críticas sobre el modal (`dialog[open]`, `getBoundingClientRect`)
 - Restricciones de contenido y ética
 
+### 5. Panel lateral de guías 📚
+
+Nuevo botón **📚 Guías** en la barra de navegación sticky que abre un panel lateral (`<aside>` slide-in) con:
+
+- 4 tabs por nivel de juego (N1 Explorador → N4 Co-creador)
+- Contenido Markdown renderizado en HTML
+- Botones de descarga: guía del nivel activo o guía completa en `.md`
+- Cierre con botón ×, clic en backdrop o tecla Escape
+- Mensaje de error mejorado en `init()` — detecta protocolo `file://` y sugiere servidor estático
+
+### 6. Bug crítico: backticks sin escapar en `GUIDE_MARKDOWN.n3`
+
+El texto de guía del nivel 3 contenía `` `.json` `` (backticks sin escapar) dentro de un template literal de JavaScript. Esto terminaba el string prematuramente y causaba en runtime:
+
+```
+Uncaught TypeError: "# Guía Nivel 3…" is not a function
+```
+
+El error impedía que `attachEvents()` completara, dejando toda la app sin interactividad en GitHub Pages.
+
+**Fix:** escapar los backticks como `` \`.json\` `` en la cadena `n3`.
+
+**Por qué el check de sintaxis no lo detectó:** `new Function(script)` solo verifica sintaxis. `value.property\`template\`` es sintaxis válida — el `TypeError` solo ocurre en runtime cuando JS intenta invocar `undefined` como función de template tag.
+
 ---
 
-## Archivos Clave
+## Archivos Modificados / Creados
 
 ```text
-AGENTS.md
-CLAUDE.md                               ← nuevo
-index.html
-data/routes.json
-data/activities.json
-data/badges.json
-data/avatars.json
-data/game_config.json
-tests/index.html                        ← nuevo
-docs/README.md
-docs/ARCHITECTURE.md
-docs/DATA_SCHEMA.md
-docs/PRIVACY_ETHICS.md
-docs/ROADMAP.md
-docs/TESTING_VALIDATION.md
-docs/USER_CASES.md
-docs/GUIA_USUARIO.md
-docs/session/COMPENDIO_SESION.md
-docs/prompts/PROMPT_ACTIVACION_PROXIMA_SESION.md
-docs/followup/PRIMER_SEGUIMIENTO.md
-exports/.gitkeep
+CLAUDE.md                               ← creado
+index.html                              ← modal fixes, panel guías, fix backtick
+tests/index.html                        ← creado (40 tests)
+docs/session/COMPENDIO_SESION.md        ← este archivo
+docs/followup/PRIMER_SEGUIMIENTO.md     ← actualizado
+docs/prompts/PROMPT_ACTIVACION_PROXIMA_SESION.md ← actualizado
 ```
 
 ---
 
-## Commits Relevantes
+## Commits de Esta Sesión
 
 ```text
-d75ec91 Fix modal display y backdrop, añadir suite de tests y CLAUDE.md
-af3fb52 Implement interactive MVP V1: profile, activity modal, 6 activity types, user guide
-92cca07 Add session closeout documents
-a769434 Implement Wellbe Quest Buen Vivir MVP
+39575a9  Fix backticks sin escapar en GUIDE_MARKDOWN n3 que rompían el app
+74b9947  Mejorar mensaje de error en init(): detectar file:// vs servidor
+4ab518a  Añadir panel lateral de guías de usuario por nivel con descarga
+2546237  Actualizar documentos de cierre de sesión al estado v1 corregido
+d75ec91  Fix modal display y backdrop, añadir suite de tests y CLAUDE.md
 ```
-
----
-
-## Validaciones Realizadas
-
-- `dialog[open]` verificado como el selector correcto para aplicar `display: flex` en dialogs nativos
-- `getBoundingClientRect()` verificado como el patrón correcto para detectar clics fuera del modal en `showModal()`
-- Tests ejecutados con Node.js inline: 18/18 pasaron
-- Tests verificados como sintaxis correcta para el runner HTML
-- Push a `main` confirmado sin errores
 
 ---
 
@@ -156,9 +122,11 @@ a769434 Implement Wellbe Quest Buen Vivir MVP
 | Componente | Estado |
 |---|---|
 | Modal de actividad | Corregido — layout y cierre funcionan |
-| Tests unitarios | Implementados — 40 assertions |
+| Tests unitarios | 40 assertions — todas pasan |
 | CLAUDE.md | Creado |
-| Documentos de sesión | Actualizados |
-| Push a GitHub | Completado (`d75ec91`) |
+| Panel 📚 Guías | Implementado — 4 tabs, descarga MD |
+| Bug backtick n3 | Corregido y desplegado |
+| Push a GitHub | Completado (`39575a9`) |
+| GitHub Pages | App funcional tras el fix |
 
-**Pendiente para próxima sesión:** prueba manual completa en el navegador desde GitHub Pages; mejoras de accesibilidad (`aria-pressed`, live regions, confirmaciones de reinicio).
+**Pendiente para próxima sesión:** prueba manual completa del checklist en GitHub Pages; mejoras de accesibilidad (`aria-pressed`, live regions, confirmaciones de reinicio/importar).
