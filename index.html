@@ -2024,12 +2024,16 @@
         attachEvents();
         status.textContent = "Datos locales cargados";
       } catch (err) {
+        console.error("[WellBe Quest] Error en init():", err);
         status.textContent = "Error al cargar datos";
         status.classList.add("error");
+        const isLocalFile = location.protocol === "file:";
+        const hint = isLocalFile
+          ? `Abre la app desde un servidor estático: <code>python3 -m http.server 8000</code> → <code>localhost:8000</code>`
+          : `Recarga la página (Ctrl+Shift+R / Cmd+Shift+R). Si el error persiste, abre la consola del navegador para más detalles.`;
         document.querySelector("#app").insertAdjacentHTML("afterbegin", `
           <div class="notice error">
-            No se pudieron cargar los JSON locales. Ejecuta un servidor estático desde la raíz del proyecto:<br>
-            <code>python3 -m http.server 8000</code> y abre <code>localhost:8000</code>.
+            No se pudieron cargar los datos de la aplicación. ${hint}
           </div>`);
       }
     }
