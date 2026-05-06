@@ -348,9 +348,11 @@
       padding: 0;
       width: min(720px, calc(100vw - 32px));
       max-height: calc(100vh - 48px);
+      overflow: hidden;
+    }
+    dialog[open] {
       display: flex;
       flex-direction: column;
-      overflow: hidden;
     }
     dialog::backdrop { background: rgba(10,20,15,.55); backdrop-filter: blur(3px); }
     .modal-header {
@@ -1501,7 +1503,10 @@
       /* Modal close */
       document.querySelector("#modal-close").addEventListener("click", closeModal);
       document.querySelector("#activity-modal").addEventListener("click", e => {
-        if (e.target === e.currentTarget) closeModal();
+        const rect = e.currentTarget.getBoundingClientRect();
+        const inside = e.clientX >= rect.left && e.clientX <= rect.right
+                    && e.clientY >= rect.top  && e.clientY <= rect.bottom;
+        if (!inside) closeModal();
       });
       document.querySelector("#activity-modal").addEventListener("keydown", e => {
         if (e.key === "Escape") closeModal();

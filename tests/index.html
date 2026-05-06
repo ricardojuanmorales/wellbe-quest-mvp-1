@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WellBe Quest — Tests</title>
+  <style>
+    body { font-family: monospace; background: #f5f5f5; margin: 0; padding: 24px; }
+    h1 { font-size: 1.2rem; margin: 0 0 20px; color: #1a1a2e; }
+    .suite { background: #fff; border-radius: 8px; padding: 16px 20px; margin-bottom: 16px; border: 1px solid #e0e0e0; }
+    .suite h2 { font-size: .95rem; margin: 0 0 10px; color: #444; border-bottom: 1px solid #eee; padding-bottom: 6px; }
+    .test { display: flex; align-items: flex-start; gap: 8px; padding: 4px 0; font-size: .88rem; }
+    .pass { color: #166534; }
+    .fail { color: #991b1b; }
+    .icon { flex-shrink: 0; font-weight: bold; }
+    .detail { color: #666; font-size: .8rem; margin-left: 16px; }
+    #summary { font-size: 1rem; font-weight: bold; padding: 12px 20px; border-radius: 8px; margin-top: 8px; }
+    #summary.all-pass { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+    #summary.has-fail  { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+  </style>
+</head>
+<body>
+  <h1>WellBe Quest — Suite de Tests</h1>
+  <div id="output"></div>
+  <div id="summary"></div>
+
+<script>
+/* ─────────────────────────────────────────
+   Mini test runner
+───────────────────────────────────────── */
+const results = [];
+
+function assert(description, condition, detail = "") {
+  results.push({ description, pass: !!condition, detail: condition ? "" : detail });
+}
+
+function assertEqual(description, actual, expected) {
+  const pass = JSON.stringify(actual) === JSON.stringify(expected);
+  results.push({ description, pass, detail: pass ? "" : `esperado: ${JSON.stringify(expected)}, obtenido: ${JSON.stringify(actual)}` });
+}
+
+/* ─────────────────────────────────────────
+   Réplica de las funciones puras de index.html
+   (mantenidas en sync con index.html)
+───────────────────────────────────────── */
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;").replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;").replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function uniqueKnownIds(ids, knownSet) {
+  return [...new Set(Array.isArray(ids) ? ids : [])].filter(id => knownSet.has(id));
+}
+
+function createDefaultProgress() {
+  return {
+    version: "1.0.0",
+    selectedAvatarId: "",
+    completedActivityIds: [],
+    earnedBadgeIds: [],
+    points: 0,
+    level: 1,
+    routeProgress: {},
+    stats: { completedActivities: 0, completedRoutes: 0, exportedCount: 0, importedCount: 0 },
+    updatedAt: new Date().toISOString()
+  };
+}
+
+function calculateLevel(levels, points) {
+  return levels.reduce((sel, lv) => points >= lv.min_points ? lv : sel, levels[0])?.level || 1;
+}
+
+function calculateRouteProgress(routes, completedIds) {
+  const done = new Set(completedIds);
+  const rp = {};
+  routes.forEach(route => {
+    const total = route.activity_ids.length;
+    const count = route.activity_ids.filter(id => done.has(id)).length;
+    rp[route.id] = { completed: count, total, percent: total ? Math.round((count / total) * 100) : 0, complete: total > 0 && count === total };
+  });
+  return rp;
+}
+
+function evaluateBadges(activities, routes, badges, completedIds) {
+  const done = new Set(completedIds);
+  const rp = calculateRouteProgress(routes, completedIds);
+  const completedActivities = activities.filter(a => done.has(a.id));
+  const completedRoutes = Object.values(rp).filter(r => r.complete).length;
+  const completedTypes = new Set(completedActivities.map(a => a.type));
+  return badges.filter(badge => {
+    if (badge.trigger === "complete_1_activity")         return done.size >= 1;
+    if (badge.trigger === "complete_1_route")            return completedRoutes >= 1;
+    if (badge.trigger === "complete_6_activities")       return done.size >= 6;
+    if (badge.trigger === "complete_12_activities")      return done.size >= 12;
+    if (badge.trigger === "complete_community_activity") return completedActivities.some(a => a.route_id === "route-agroecologia-comunidad");
+    if (badge.trigger === "complete_ai_activity")        return completedActivities.some(a => a.route_id === "route-ia-salud-buen-vivir");
+    if (badge.trigger === "complete_4_activity_types")   return completedTypes.size >= 4;
+    return false;
+  }).map(b => b.id);
+}
+
+/* ─────────────────────────────────────────
+   Datos de prueba
+───────────────────────────────────────── */
+const MOCK_LEVELS = [
+  { level: 1, min_points: 0 },
+  { level: 2, min_points: 50 },
+  { level: 3, min_points: 120 },
+  { level: 4, min_points: 220 }
+];
+
+const MOCK_ROUTES = [
+  { id: "route-nutricion",   activity_ids: ["act-1", "act-2", "act-3"] },
+  { id: "route-comunidad",   activity_ids: ["act-4", "act-5", "act-6"] },
+  { id: "route-agroecologia-comunidad", activity_ids: ["act-7"] },
+  { id: "route-ia-salud-buen-vivir",    activity_ids: ["act-8"] }
+];
+
+const MOCK_ACTIVITIES = [
+  { id: "act-1", route_id: "route-nutricion",   type: "quiz",             points: 20 },
+  { id: "act-2", route_id: "route-nutricion",   type: "claim_detector",   points: 25 },
+  { id: "act-3", route_id: "route-nutricion",   type: "branching_case",   points: 30 },
+  { id: "act-4", route_id: "route-comunidad",   type: "mind_map",         points: 20 },
+  { id: "act-5", route_id: "route-comunidad",   type: "simple_simulation",points: 25 },
+  { id: "act-6", route_id: "route-comunidad",   type: "reflection",       points: 20 },
+  { id: "act-7", route_id: "route-agroecologia-comunidad", type: "quiz",  points: 25 },
+  { id: "act-8", route_id: "route-ia-salud-buen-vivir",    type: "quiz",  points: 25 }
+];
+
+const MOCK_BADGES = [
+  { id: "badge-primer-paso",        trigger: "complete_1_activity" },
+  { id: "badge-primera-ruta",       trigger: "complete_1_route" },
+  { id: "badge-mitad-camino",       trigger: "complete_6_activities" },
+  { id: "badge-aprendizaje-completo", trigger: "complete_12_activities" },
+  { id: "badge-comunidad",          trigger: "complete_community_activity" },
+  { id: "badge-ia",                 trigger: "complete_ai_activity" },
+  { id: "badge-explorador-tipos",   trigger: "complete_4_activity_types" }
+];
+
+/* ─────────────────────────────────────────
+   Suite 1: escapeHtml
+───────────────────────────────────────── */
+(function suiteEscapeHtml() {
+  const suite = "escapeHtml";
+  assert(`${suite} — escapa <script>`, escapeHtml("<script>") === "&lt;script&gt;");
+  assert(`${suite} — escapa comillas dobles`, escapeHtml('"hola"') === "&quot;hola&quot;");
+  assert(`${suite} — escapa ampersand`, escapeHtml("a&b") === "a&amp;b");
+  assert(`${suite} — escapa comilla simple`, escapeHtml("it's") === "it&#039;s");
+  assert(`${suite} — null devuelve cadena vacía`, escapeHtml(null) === "");
+  assert(`${suite} — undefined devuelve cadena vacía`, escapeHtml(undefined) === "");
+  assert(`${suite} — número se convierte a string`, escapeHtml(42) === "42");
+  assert(`${suite} — texto sin caracteres especiales sin cambios`, escapeHtml("Buen vivir") === "Buen vivir");
+})();
+
+/* ─────────────────────────────────────────
+   Suite 2: uniqueKnownIds
+───────────────────────────────────────── */
+(function suiteUniqueKnownIds() {
+  const suite = "uniqueKnownIds";
+  const known = new Set(["a", "b", "c"]);
+  assertEqual(`${suite} — filtra IDs desconocidos`, uniqueKnownIds(["a", "x", "b"], known), ["a", "b"]);
+  assertEqual(`${suite} — elimina duplicados`, uniqueKnownIds(["a", "a", "b"], known), ["a", "b"]);
+  assertEqual(`${suite} — array vacío devuelve vacío`, uniqueKnownIds([], known), []);
+  assertEqual(`${suite} — null devuelve vacío`, uniqueKnownIds(null, known), []);
+  assertEqual(`${suite} — undefined devuelve vacío`, uniqueKnownIds(undefined, known), []);
+  assertEqual(`${suite} — todos desconocidos devuelve vacío`, uniqueKnownIds(["x", "y"], known), []);
+})();
+
+/* ─────────────────────────────────────────
+   Suite 3: calculateLevel
+───────────────────────────────────────── */
+(function suiteCalculateLevel() {
+  const suite = "calculateLevel";
+  assertEqual(`${suite} — 0 pts → nivel 1`, calculateLevel(MOCK_LEVELS, 0), 1);
+  assertEqual(`${suite} — 49 pts → nivel 1`, calculateLevel(MOCK_LEVELS, 49), 1);
+  assertEqual(`${suite} — 50 pts → nivel 2`, calculateLevel(MOCK_LEVELS, 50), 2);
+  assertEqual(`${suite} — 119 pts → nivel 2`, calculateLevel(MOCK_LEVELS, 119), 2);
+  assertEqual(`${suite} — 120 pts → nivel 3`, calculateLevel(MOCK_LEVELS, 120), 3);
+  assertEqual(`${suite} — 220 pts → nivel 4`, calculateLevel(MOCK_LEVELS, 220), 4);
+  assertEqual(`${suite} — 999 pts → nivel 4`, calculateLevel(MOCK_LEVELS, 999), 4);
+})();
+
+/* ─────────────────────────────────────────
+   Suite 4: calculateRouteProgress
+───────────────────────────────────────── */
+(function suiteCalculateRouteProgress() {
+  const suite = "calculateRouteProgress";
+
+  const empty = calculateRouteProgress(MOCK_ROUTES, []);
+  assertEqual(`${suite} — sin actividades, completed=0`, empty["route-nutricion"].completed, 0);
+  assertEqual(`${suite} — sin actividades, complete=false`, empty["route-nutricion"].complete, false);
+  assertEqual(`${suite} — sin actividades, percent=0`, empty["route-nutricion"].percent, 0);
+
+  const partial = calculateRouteProgress(MOCK_ROUTES, ["act-1", "act-2"]);
+  assertEqual(`${suite} — 2/3 completadas, complete=false`, partial["route-nutricion"].complete, false);
+  assertEqual(`${suite} — 2/3 completadas, percent=67`, partial["route-nutricion"].percent, 67);
+
+  const full = calculateRouteProgress(MOCK_ROUTES, ["act-1", "act-2", "act-3"]);
+  assertEqual(`${suite} — ruta completa, complete=true`, full["route-nutricion"].complete, true);
+  assertEqual(`${suite} — ruta completa, percent=100`, full["route-nutricion"].percent, 100);
+
+  const other = calculateRouteProgress(MOCK_ROUTES, ["act-4", "act-5", "act-6"]);
+  assertEqual(`${suite} — ruta-comunidad completa, route-nutricion intacta`, other["route-nutricion"].complete, false);
+  assertEqual(`${suite} — ruta-comunidad completa`, other["route-comunidad"].complete, true);
+})();
+
+/* ─────────────────────────────────────────
+   Suite 5: evaluateBadges
+───────────────────────────────────────── */
+(function suiteEvaluateBadges() {
+  const suite = "evaluateBadges";
+
+  const none = evaluateBadges(MOCK_ACTIVITIES, MOCK_ROUTES, MOCK_BADGES, []);
+  assertEqual(`${suite} — sin actividades, sin badges`, none, []);
+
+  const one = evaluateBadges(MOCK_ACTIVITIES, MOCK_ROUTES, MOCK_BADGES, ["act-1"]);
+  assert(`${suite} — 1 actividad → badge-primer-paso`, one.includes("badge-primer-paso"));
+  assert(`${suite} — 1 actividad → NO badge-primera-ruta`, !one.includes("badge-primera-ruta"));
+
+  const routeDone = evaluateBadges(MOCK_ACTIVITIES, MOCK_ROUTES, MOCK_BADGES, ["act-1","act-2","act-3"]);
+  assert(`${suite} — ruta completa → badge-primera-ruta`, routeDone.includes("badge-primera-ruta"));
+
+  const sixDone = evaluateBadges(MOCK_ACTIVITIES, MOCK_ROUTES, MOCK_BADGES, ["act-1","act-2","act-3","act-4","act-5","act-6"]);
+  assert(`${suite} — 6 actividades → badge-mitad-camino`, sixDone.includes("badge-mitad-camino"));
+
+  const community = evaluateBadges(MOCK_ACTIVITIES, MOCK_ROUTES, MOCK_BADGES, ["act-7"]);
+  assert(`${suite} — actividad comunidad → badge-comunidad`, community.includes("badge-comunidad"));
+
+  const ia = evaluateBadges(MOCK_ACTIVITIES, MOCK_ROUTES, MOCK_BADGES, ["act-8"]);
+  assert(`${suite} — actividad IA → badge-ia`, ia.includes("badge-ia"));
+
+  const fourTypes = evaluateBadges(MOCK_ACTIVITIES, MOCK_ROUTES, MOCK_BADGES, ["act-1","act-2","act-3","act-4"]);
+  assert(`${suite} — 4 tipos distintos → badge-explorador-tipos`, fourTypes.includes("badge-explorador-tipos"));
+})();
+
+/* ─────────────────────────────────────────
+   Suite 6: createDefaultProgress
+───────────────────────────────────────── */
+(function suiteDefaultProgress() {
+  const suite = "createDefaultProgress";
+  const p = createDefaultProgress();
+  assertEqual(`${suite} — level inicial = 1`, p.level, 1);
+  assertEqual(`${suite} — points inicial = 0`, p.points, 0);
+  assertEqual(`${suite} — completedActivityIds vacío`, p.completedActivityIds, []);
+  assertEqual(`${suite} — earnedBadgeIds vacío`, p.earnedBadgeIds, []);
+  assert(`${suite} — updatedAt presente`, typeof p.updatedAt === "string" && p.updatedAt.length > 0);
+  assertEqual(`${suite} — stats.completedActivities = 0`, p.stats.completedActivities, 0);
+})();
+
+/* ─────────────────────────────────────────
+   Render resultados
+───────────────────────────────────────── */
+const suiteGroups = {};
+results.forEach(r => {
+  const [suite] = r.description.split(" — ");
+  if (!suiteGroups[suite]) suiteGroups[suite] = [];
+  suiteGroups[suite].push(r);
+});
+
+const container = document.querySelector("#output");
+Object.entries(suiteGroups).forEach(([suite, tests]) => {
+  const div = document.createElement("div");
+  div.className = "suite";
+  div.innerHTML = `<h2>${suite}</h2>` + tests.map(t => `
+    <div class="test ${t.pass ? "pass" : "fail"}">
+      <span class="icon">${t.pass ? "✓" : "✗"}</span>
+      <div>
+        <span>${t.description.split(" — ")[1]}</span>
+        ${t.detail ? `<div class="detail">${t.detail}</div>` : ""}
+      </div>
+    </div>`).join("");
+  container.appendChild(div);
+});
+
+const total  = results.length;
+const passed = results.filter(r => r.pass).length;
+const failed = total - passed;
+const summary = document.querySelector("#summary");
+summary.className = failed === 0 ? "all-pass" : "has-fail";
+summary.textContent = failed === 0
+  ? `✓ ${total}/${total} tests pasaron`
+  : `✗ ${failed} de ${total} tests fallaron`;
+</script>
+</body>
+</html>
